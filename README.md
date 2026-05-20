@@ -79,7 +79,7 @@ Example sets:
 - **Writing** — em dashes, quotation marks, IPA symbols
 - **Discord** — most-used emoji and kaomoji
 - **Code** — math operators, arrows, Greek variables
-- **Hibrythian Saga** — worldbuilding-specific symbols and glyphs
+- **Worldbuilding** — worldbuilding-specific symbols and glyphs
 
 Up to 5 named sets in v1.0.0. Switch active set from the tray or main window.
 

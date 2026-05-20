@@ -49,13 +49,13 @@ Every emoji, symbol, kaomoji, phonetic character, and Unicode glyph you need —
 
 Shortcuts are **hardwired** — intentional and by design. No customization option.
 
-| Platform | Shortcut | Implementation |
-|---|---|---|
-| Windows | `RCtrl + RShift + RAlt + E` | `rdev` Rust crate — raw key hook, right-side modifiers only |
-| Linux | `RCtrl + RShift + RAlt + E` | `rdev` Rust crate — X11/Wayland raw input |
-| macOS | `Ctrl + Shift + Option + P` | Tauri standard global hotkey registration |
+| Platform | Shortcut |
+|---|---|
+| Windows | `RCtrl + RShift + RAlt + E` |
+| Linux | `RCtrl + RShift + RAlt + E` |
+| macOS | `Ctrl + Shift + Option + P` |
 
-The right-side modifier chord is deliberate — spacious, under-used, and feels like an intentional gesture rather than an accidental combo.
+The right-side modifier chord is deliberate — spacious, under-used, and feels like an intentional gesture rather than an accidental combo. Global shortcuts are registered via Electron's `globalShortcut` API (the same approach used by MultiRP and Quilvar).
 
 ---
 
@@ -70,7 +70,7 @@ The primary interaction surface — summoned by the global shortcut from anywher
 - Results update instantly across all Mote categories
 - Arrow keys to navigate, `Enter` to insert directly into the active app
 - `Esc` to dismiss with no side effects
-- Insert method: OS-level input injection via `enigo` — **no visible clipboard roundtrip**
+- Insert method: simulated keypress via Electron's `clipboard` + `robot.js` or `@nut-tree/nut-js` — no visible clipboard roundtrip
 
 ### 🗂️ Mote Sets *(Named Profiles)*
 Each Mote Set is a named collection of preferred/pinned Motes scoped to a context.
@@ -118,16 +118,18 @@ All content is sourced from [unicode.org](https://unicode.org) public data and *
 
 ## Tech Stack
 
+> **Note:** Varmojii uses Electron — the same stack as [MultiRP](https://github.com/AlarkiusJay/MultiRPCustomizer) and [Quilvar](https://github.com/TheAlarklynZone/Quilvar). Tauri was evaluated for Quilvar but abandoned after repeated tray/autostart failures across v0.1.2–v0.1.5. Electron's `Tray`, `BrowserWindow`, and `globalShortcut` APIs handle this pattern reliably across all three platforms.
+
 | Layer | Technology | Reason |
 |---|---|---|
-| App shell | Tauri (Rust backend) | Tiny binary (~5MB), true cross-platform, native tray |
-| Frontend | React 18 + Vite + Tailwind CSS | Consistent with Quillosofi stack |
-| Global hotkey | `rdev` Rust crate | Only library exposing L/R modifier distinction on Win/Linux |
-| Direct insert | `enigo` Rust crate | OS-level input injection, no clipboard roundtrip |
+| App shell | Electron | Proven tray + globalShortcut pattern across the org (MultiRP, Quilvar) |
+| Frontend | React 18 + Vite + Tailwind CSS | Consistent with Quillosofi + Quilvar stack |
+| Global hotkey | `electron.globalShortcut` | Rock-solid cross-platform, same as MultiRP |
+| Direct insert | `@nut-tree/nut-js` or `robotjs` | OS-level input injection, no clipboard roundtrip |
 | Data | Local bundled JSON (unicode.org sourced) | 100% offline, zero runtime API calls |
-| Auto-updater | `tauri-plugin-updater` via GitHub Releases | Consistent with org pipeline |
-| Local persistence | `tauri-plugin-store` | Pins, recents, Mote Sets stored safely on disk |
-| Build/CI | GitHub Actions on `v` tag push | Consistent with existing org pipeline |
+| Local persistence | `electron-store` or `better-sqlite3` | Pins, recents, Mote Sets stored safely on disk |
+| Auto-updater | `electron-updater` via GitHub Releases | Consistent with MultiRP pipeline |
+| Build/CI | `electron-builder` + GitHub Actions on `v*` tag push | Consistent with existing org pipeline |
 
 ---
 
@@ -140,21 +142,23 @@ All content is sourced from [unicode.org](https://unicode.org) public data and *
 | **MultiRP** | `AlarkiusJay/MultiRPCustomizer` | Discord Rich Presence manager |
 | **Varmojii** | `TheAlarklynZone/Varmojii` | System-wide glyph and emoji picker |
 
+All four apps share the same Electron + electron-builder + GitHub Actions pipeline.
+
 ---
 
 ## MVP Scope (v1.0.0)
 
-- ✅ Tray app on Windows, macOS, Linux via Tauri
+- ✅ Tray app on Windows, macOS, Linux via Electron
 - ✅ Global hotkey → Quick Draw overlay (hardwired, platform-specific)
 - ✅ All eight Mote categories bundled locally
 - ✅ Search-as-you-type across all categories
-- ✅ Direct insert via `enigo`
+- ✅ Direct insert (no clipboard roundtrip)
 - ✅ Persistent recents (survives restart)
 - ✅ Pinned Motes
 - ✅ Mote Sets (named profiles, up to 5)
 - ✅ Dark mode default, follow-system option
 - ✅ Right-click menus: tray, Motes, Sets
-- ✅ In-app auto-updater via GitHub Releases
+- ✅ In-app auto-updater via GitHub Releases (`electron-updater`)
 - ✅ No telemetry, no cloud, no account
 
 ---

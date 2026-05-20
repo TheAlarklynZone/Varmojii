@@ -176,8 +176,7 @@ All four apps share the same Electron + electron-builder + GitHub Actions pipeli
 
 ## Status
 
-> 🚧 **Early development.** MVP in planning phase.  
-> Handoff destination: [Bolt.new](https://bolt.new)
+> 🚧 **Early development.** MVP in planning phase.
 
 ---
 
